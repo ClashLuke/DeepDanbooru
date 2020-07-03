@@ -1,17 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import importlib
+import os
+import sys
 from unittest import mock
 
 import numpy
 import pytest
 import six
-from click.testing import CliRunner
 from PIL import Image
+from click.testing import CliRunner
+
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 
 def test_import():
-    import deepdanbooru
+    pass
 
 
 @pytest.mark.parametrize('func_name', ['main', 'evaluate'])
@@ -30,7 +34,6 @@ def packages():
 
 
 def test_package_setup(packages):
-    import setuptools
     with mock.patch('setuptools.setup'):
         import setup
         setup_pkgs = setup.install_requires
@@ -38,7 +41,7 @@ def test_package_setup(packages):
     assert setup_pkgs == list(
         filter(lambda x: not x.startswith('tensorflow'), packages))
     assert list(
-        filter(lambda x: x.startswith('tensorflow'), packages)
+        filter(lambda x: x.startswith('tensorflow') and 'addons' not in x, packages)
     ) == [tensorflow_pkg]
 
 
@@ -56,11 +59,11 @@ def test_readme_pkg(packages):
         sorted(filter(lambda x: not x.startswith('tensorflow'), packages))
     )
 
-    assert list(
+    assert list(sorted(
         filter(lambda x: x.startswith('tensorflow'), packages)
-    ) == list(
+    )) == list(sorted(
         filter(lambda x: x.startswith('tensorflow'), readme_pkgs)
-    )
+    ))
 
 
 @pytest.mark.parametrize('use_bytes_io', [True, False])
