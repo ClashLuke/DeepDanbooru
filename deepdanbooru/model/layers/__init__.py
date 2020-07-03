@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+import tensorflow_addons as tfa
 
 def conv(x, filters, kernel_size, strides=(1, 1), padding='same', initializer='he_normal'):
     c = tf.keras.layers.Conv2D(
@@ -22,7 +22,7 @@ def conv_bn_relu(x, filters, kernel_size, strides=(1, 1), padding='same', initia
     c_bn = conv_bn(x, filters=filters, kernel_size=kernel_size, strides=strides, padding=padding,
                    initializer=initializer, bn_gamma_initializer=bn_gamma_initializer)
 
-    return tf.keras.layers.Activation('relu')(c_bn)
+    return tfa.activations.mish(c_bn)
 
 
 def conv_gap(x, output_filters, kernel_size=(1, 1)):
