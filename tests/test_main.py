@@ -39,7 +39,7 @@ def test_package_setup(packages):
         setup_pkgs = setup.install_requires
         tensorflow_pkg = setup.tensorflow_pkg
     assert setup_pkgs == list(
-        filter(lambda x: not x.startswith('tensorflow'), packages))
+        filter(lambda x: not x.startswith('tensorflow') or 'addons' in x, packages))
     assert list(
         filter(lambda x: x.startswith('tensorflow') and 'addons' not in x, packages)
     ) == [tensorflow_pkg]
