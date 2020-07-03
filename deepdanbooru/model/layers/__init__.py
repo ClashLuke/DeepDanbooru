@@ -52,7 +52,7 @@ def squeeze_excitation(x, reduction=1):
     s = tf.keras.layers.Dense(output_filters//reduction)(s)
     s = tf.keras.layers.BatchNormalization()(s)
     s = tfa.activations.mish(s)
-    s = tf.keras.layers.Dense(output_filters, activation='sigmoid')(s)
+    s = tf.keras.layers.Dense(output_filters, activation='tanh')(s)
     s = tf.keras.layers.Reshape((None, None, 1, 1))(s)
     x = tf.keras.layers.Multiply()([x, s])
 
