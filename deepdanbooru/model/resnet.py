@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import tensorflow_addons as tfa
 import deepdanbooru as dd
 
 
@@ -14,10 +15,7 @@ def resnet_bottleneck_block(x, output_filters, inter_filters, activation=True, s
 
     p = tf.keras.layers.Add()([c3, x])
 
-    if activation:
-        return tf.keras.layers.Activation('relu')(p)
-    else:
-        return p
+    return tfa.activations.mish(p) if activation else p
 
 
 def resnet_bottleneck_inc_block(x, output_filters, inter_filters, strides1x1=(1, 1), strides2x2=(2, 2), se=False):
@@ -37,7 +35,7 @@ def resnet_bottleneck_inc_block(x, output_filters, inter_filters, strides1x1=(1,
 
     p = tf.keras.layers.Add()([c3, s])
 
-    return tf.keras.layers.Activation('relu')(p)
+    return tfa.activations.mish(p)
 
 
 def resnet_original_bottleneck_model(x, filter_sizes, repeat_sizes, final_pool=True, se=False):
@@ -105,7 +103,7 @@ def resnet_longterm_bottleneck_model(x, filter_sizes, repeat_sizes, final_pool=T
             se=se)
 
         x = tf.keras.layers.Add()([x_1, x])  # long-term shortcut
-        x = tf.keras.layers.Activation('relu')(x)
+        x = tfa.activations.mish(x)
 
     if final_pool:
         x = tf.keras.layers.AveragePooling2D((7, 7), name='ap_final')(x)
@@ -113,11 +111,11 @@ def resnet_longterm_bottleneck_model(x, filter_sizes, repeat_sizes, final_pool=T
     return x
 
 
-def create_resnet_152(x, output_dim):
+def create_resnet_152(x, output_dim, filter_factor=256):
     """
     Original ResNet-152 Model.
     """
-    filter_sizes = [256, 512, 1024, 2048]
+    filter_sizes = [filter_factor * i for i in [1, 2, 4, 8]]
     repeat_sizes = [2, 7, 35, 2]
 
     x = resnet_original_bottleneck_model(
@@ -130,12 +128,12 @@ def create_resnet_152(x, output_dim):
     return x
 
 
-def create_resnet_custom_v1(x, output_dim):
+def create_resnet_custom_v1(x, output_dim, filter_factor=256):
     """
     DeepDanbooru web (until 2019/04/20)
     Short, wide
     """
-    filter_sizes = [256, 512, 1024, 2048, 4096]
+    filter_sizes = [filter_factor * i for i in [1, 2, 4, 8, 16]]
     repeat_sizes = [2, 7, 35, 2, 2]
 
     x = resnet_original_bottleneck_model(
@@ -147,12 +145,12 @@ def create_resnet_custom_v1(x, output_dim):
     return x
 
 
-def create_resnet_custom_v2(x, output_dim):
+def create_resnet_custom_v2(x, output_dim, filter_factor=256):
     """
     Experimental (blazing-deep network)
     Deep, narrow
     """
-    filter_sizes = [256, 512, 1024, 1024, 1024, 2048]
+    filter_sizes = [filter_factor * i for i in [1, 2, 4, 4, 4, 8]]
     repeat_sizes = [2, 7, 40, 16, 16, 6]
 
     x = resnet_original_bottleneck_model(
@@ -164,12 +162,12 @@ def create_resnet_custom_v2(x, output_dim):
     return x
 
 
-def create_resnet_custom_v3(x, output_dim):
+def create_resnet_custom_v3(x, output_dim, filter_factor=256):
     """
     DeepDanbooru web (until 2019/04/20)
     Short, wide
     """
-    filter_sizes = [256, 512, 1024, 1024, 2048, 4096]
+    filter_sizes = [filter_factor * i for i in [1, 2, 4, 4, 4, 8]]
     repeat_sizes = [2, 7, 19, 19, 2, 2]
 
     x = resnet_original_bottleneck_model(
